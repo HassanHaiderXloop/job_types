@@ -1,0 +1,28 @@
+.heading {
+    text-align: center;
+    font-size: 25px;
+}
+.textbox{
+    margin: auto;
+    width: 352px;
+    padding-bottom: 30px;
+    padding-top: 20px;
+}
+
+       
+.text{
+    width: 260px;
+    height: 25px;
+}
+.button{
+   
+    width: 84px;
+    height: 31px;
+    left: 20px;
+    text-decoration: none;
+    background-color: #1877f2;
+    position: relative;
+    border: none;
+    
+}
+

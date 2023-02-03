@@ -1,0 +1,18 @@
+.ant-table-thead > tr > th {
+  background-color: #4481eb !important;
+  color: white !important;
+}
+.ant-table-thead > tr > th > svg{
+  color: white !important;
+}
+
+.ant-select-selection-item {
+  background-color: #4481eb !important;
+  color: white;
+}
+
+.anticon-close{
+  color: white !important;
+  margin-left: 10px;
+  font-size: 12px !important;
+}
