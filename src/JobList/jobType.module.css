@@ -1,6 +1,7 @@
 .heading {
     text-align: center;
     font-size: 25px;
+    padding-top: 25px;
 }
 .textbox{
     margin: auto;
@@ -22,7 +23,9 @@
     text-decoration: none;
     background-color: #1877f2;
     position: relative;
-    border: none;
-    
+    border: none;  
+    color: white;
+    border-radius: 5px;
 }
+
 
