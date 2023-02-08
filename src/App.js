@@ -12,7 +12,7 @@ function App() {
       <header className="App-header">
        
       {<TextBar/> }
-      {<JobTypes/>}
+      {/* {<JobTypes/>} */}
       {<Demo/>} 
       </header>
     </div>

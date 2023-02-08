@@ -162,8 +162,8 @@ const Demo = () => {
     },
     
     {
-      title: 'Operation',
-      dataIndex: 'operation',
+      title: 'Action',
+      dataIndex: 'Action',
       render: (_, record) => {
         const editable = isEditing(record);
         return editable ? (
