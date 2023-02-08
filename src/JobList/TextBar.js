@@ -14,3 +14,4 @@ function TextBar() {
 }
 
 export default TextBar
+

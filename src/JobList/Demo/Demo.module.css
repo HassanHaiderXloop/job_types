@@ -1,0 +1,9 @@
+
+.DeleteIcon{
+    color: rgba(255, 8, 8, 0.856);
+    margin-left: 20px;
+}
+
+.DeleteBtn[disabled] .DeleteIcon{
+    color: darkgray;
+}
