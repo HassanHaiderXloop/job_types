@@ -39,7 +39,7 @@ const EditableCell = ({
     </td>
   );
 };
-const Demo = () => {
+const Benefit = () => {
   const [form] = Form.useForm();
   const [data, setData] = useState([]);
   const [benefit, setBenefit] = useState('');
@@ -234,4 +234,4 @@ const Demo = () => {
     </>
   );
 };
-export default Demo;
+export default Benefit;
