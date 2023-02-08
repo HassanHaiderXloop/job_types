@@ -1,8 +1,8 @@
 // import logo from './logo.svg';
-import './App.css';
+// import './App.css';
 import Demo from './JobList/Demo/Demo';
-import JobTypes from './JobList/JobTypes';
-import TextBar from './JobList/TextBar';
+// import JobTypes from './JobList/JobTypes';
+
 
 
 function App() {
@@ -11,7 +11,7 @@ function App() {
     <div className="App">
       <header className="App-header">
        
-      {<TextBar/> }
+     
       {/* {<JobTypes/>} */}
       {<Demo/>} 
       </header>
