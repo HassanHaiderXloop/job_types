@@ -1,7 +1,8 @@
 
 .DeleteIcon{
     color: rgba(255, 8, 8, 0.856);
-    margin-left: 20px;
+    font-size: 20px;  
+    padding: 5px;
 }
 
 .DeleteBtn[disabled] .DeleteIcon{
@@ -19,7 +20,6 @@
     padding-bottom: 30px;
     padding-top: 20px;
 }
-
        
 .text{
     width: 260px;
@@ -36,4 +36,8 @@
     border: none;  
     color: white;
     border-radius: 5px;
+}
+.cycle_btn{
+    color: green;
+    font-size: 20px;
 }
