@@ -1,11 +1,11 @@
 import { Form, InputNumber, Popconfirm, Table, Typography, Input } from "antd";
-import { useState , useEffect } from "react";
-import swal from 'sweetalert';
+import { useEffect, useState } from "react";
+// import swal from 'sweetalert';
 import {
   faTrash,
-  faUndo
+  faUndo,
 } from "@fortawesome/free-solid-svg-icons";
-// import swal from "sweetalert";
+import swal from "sweetalert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconButton } from "@mui/material";
 import styled from "./Demo.module.css";
@@ -49,37 +49,127 @@ const Benefit = () => {
   const [benefit, setBenefit] = useState("");
   const [editingKey, setEditingKey] = useState("");
 
+  useEffect(()=>{
+
+    const fetchData = ()=>{
+      fetch(
+        `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/benefits/all`
+      )
+      .then( async (response) =>{
+        if(!(response.status>=200 && response.status<300) ){
+          throw new Error(response.status);
+        }  
+        return await response.json()
+      })
+      .then((data) => {
+        data = data.map(d=>{return {...d, key: d.id}})
+        setData(data);
+        // console.log(data);
+      })
+      .catch((err) => {
+        if(err.Error>400){
+          swal(
+            {
+              title: "Server Down",
+              icon: "error",
+            });
+        }
+        else if(err.Error>299){
+          swal({
+            title: "Server Busy",
+            icon: "error",
+          });
+        }
+      });
+    }
+
+    fetchData();
+  },[])
+
+
   const isEditing = (record) => record.key === editingKey;
   const edit = (record) => {
     form.setFieldsValue({
-      name: "",
-      age: "",
-      address: "",
+      Benefit:record.benefitPerks,
       ...record,
     });
+
+    
+
     setEditingKey(record.key);
+
+
+
   };
   const cancel = () => {
     setEditingKey("");
   };
+
   const save = async (key) => {
     try {
       const row = await form.validateFields();
       const newData = [...data];
       const index = newData.findIndex((item) => key === item.key);
+      
+
+
       if (index > -1) {
         const item = newData[index];
         newData.splice(index, 1, {
           ...item,
-          ...row,
+          benefitPerks: row.Benefit,
+          // ...row,
         });
-        setData(newData);
-        setEditingKey("");
-      } else {
-        newData.push(row);
-        setData(newData);
-        setEditingKey("");
-      }
+        
+        console.log(newData);
+
+        fetch(
+          `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/benefits/update/${key}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({benefitPerks: row.Benefit}),
+          },
+    
+          {
+            mode: "cors",
+          }
+          
+        )
+          .then((response) =>{
+            // console.log(response)
+            if(!(response.status>=200 && response.status<300) ){
+              throw new Error(response.status);
+            }  
+              
+            return response.json()
+          })
+          .then((response) => {
+            setData(newData)
+            setEditingKey("");
+            // setBenefit("");
+          })
+          .catch((err) => {
+            if(err.Error>400){
+              swal(
+                {
+                  title: "Server Down",
+                  icon: "error",
+                });
+            }
+            else if(err.Error>299){
+              swal({
+                title: "Server Busy",
+                icon: "error",
+              });
+            }
+          });
+    
+      } 
+     
+
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
     }
@@ -88,175 +178,174 @@ const Benefit = () => {
   const handleChange = () => {
     setData([...data, setBenefit]);
   };
-  const AddItem = () => {
-    const benefitObj = {
-      key: data.length + 1,
-      id: data.length + 1,
-      Benefit: benefit,
-      active: "",
-    };
-    setData([...data, benefitObj]);
-    setBenefit("");
 
-    useEffect(() => {  
-      fetch(
-        `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/job/all`,
-        // `http://localhost:5000/job/post`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          }
+
+
+  const addItem = () => { 
+    const requestData = {
+      benefitPerks: benefit,
+    };
+    
+
+    fetch(
+      // `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/job/all`,
+      `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/benefits/add`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        {
-          mode: "cors",
-        }
-      )
-        .then((response) =>{
-          if(!(response.status>=200 && response.status<300) ){
-            throw new Error(response.status);
-          }  
-          return response.json()
-        })
-        .then((data) => {
-          setData(data);
-          // setFilteredData(data);
-          // setLoading(false);
-        })
-        .catch((err) => {
-          if(err.Error>400){
-            swal(
-              {
-                title: "Server Down",
-                icon: "error",
-              });
-          }
-          else if(err.Error>299){
-            swal({
-              title: "Server Busy",
+        body: JSON.stringify(requestData),
+      },
+
+      {
+        mode: "cors",
+      }
+      
+    )
+      .then((response) =>{
+        // console.log(response)
+        if(!(response.status>=200 && response.status<300) ){
+          throw new Error(response.status);
+        }  
+          
+        return response.json()
+      })
+      .then((response) => {
+        response ={ ...response, key: response.id };
+        setData([...data, response]);
+        setBenefit("");
+      })
+      .catch((err) => {
+        if(err.Error>400){
+          swal(
+            {
+              title: "Server Down",
               icon: "error",
             });
-          }
-        });
-    }, [])
+        }
+        else if(err.Error>299){
+          swal({
+            title: "Server Busy",
+            icon: "error",
+          });
+        }
+      });
+
+
   };
 
   //////////////////////////////////////////////////////////////////
-  const HandleActiceJob = (record) => {
-    setData(
-      data.map((j) => {
-        return j === record ? { ...j, active: false } : j;
-      })
-    );
-    useEffect(() => {  
-      fetch(
-        `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/job/all`,
-        // `http://localhost:5000/job/post`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          }
-        },
-        {
-          mode: "cors",
+  const handleActiceJob = (record) => {
+    // setData(
+    //   data.map((j) => {
+    //     return j === record ? { ...j, active: false } : j;
+    //   })
+    // );
+    fetch(
+      `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/benefits/reactive/${record.id}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         }
-      )
-        .then((response) =>{
-          if(!(response.status>=200 && response.status<300) ){
-            throw new Error(response.status);
-          }  
-          return response.json()
-        })
-        .then((data) => {
-          setData(data);
-          // setFilteredData(data);
-          // setLoading(false);
-        })
-        .catch((err) => {
-          if(err.Error>400){
-            swal(
-              {
-                title: "Server Down",
-                icon: "error",
-              });
-          }
-          else if(err.Error>299){
-            swal({
-              title: "Server Busy",
-              icon: "error",
-            });
-          }
+      },
+      {
+        mode: "cors",
+      }
+    )
+    .then((response) => {
+      if(!(response.status>=200 && response.status<300) ){
+        throw new Error(response.status);
+      }
+      // setJobs(job.filter(j => j !== job));
+      // setData(data.map(j =>{ return (j === job) ?{...j, active:false} : j; }));
+      // setJobs(data.map(j =>{ return (j === job) ?{...j, active:false} : j; }));
+
+      // setFilteredData(filteredData.map(j =>{ return (j === job) ?{...j, active:false} : j; }));
+      setData(data.map(j =>{ return (j === record) ?{...j, active:true} : j; }));
+    })
+    .catch((err) => {
+      if(err.Error>400){
+        swal(
+          {
+            title: "Server Down",
+            icon: "error",
+          });
+      }
+      else if(err.Error>299){
+        swal({
+          title: "Server Busy",
+          icon: "error",
         });
-    }, [])
+      }
+    });
+
   };
 
-  const HandleDeleteJob = (record) => {
-    setData(
-      data.map((j) => {
-        return j === record ? { ...j, active: true } : j;
-      })
-    );
+  const handleDeleteJob = (record) => {
 
-    useEffect(() => {  
-      fetch(
-        `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/job/all`,
-        // `http://localhost:5000/job/post`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          }
-        },
-        {
-          mode: "cors",
+    fetch(
+      `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/benefits/delete/${record.id}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
         }
-      )
-        .then((response) =>{
-          if(!(response.status>=200 && response.status<300) ){
-            throw new Error(response.status);
-          }  
-          return response.json()
-        })
-        .then((data) => {
-          setData(data);
-          // setFilteredData(data);
-          // setLoading(false);
-        })
-        .catch((err) => {
-          if(err.Error>400){
-            swal(
-              {
-                title: "Server Down",
-                icon: "error",
-              });
-          }
-          else if(err.Error>299){
-            swal({
-              title: "Server Busy",
-              icon: "error",
-            });
-          }
+      },
+      {
+        mode: "cors",
+      }
+    )
+    .then((response) => {
+      if(!(response.status>=200 && response.status<300) ){
+        throw new Error(response.status);
+      }
+      // setJobs(job.filter(j => j !== job));
+      // setData(data.map(j =>{ return (j === job) ?{...j, active:false} : j; }));
+      // setJobs(data.map(j =>{ return (j === job) ?{...j, active:false} : j; }));
+
+      // setFilteredData(filteredData.map(j =>{ return (j === job) ?{...j, active:false} : j; }));
+      setData(data.map(j =>{ return (j === record) ?{...j, active:false} : j; }));
+    })
+    .catch((err) => {
+      if(err.Error>400){
+        swal(
+          {
+            title: "Server Down",
+            icon: "error",
+          });
+      }
+      else if(err.Error>299){
+        swal({
+          title: "Server Busy",
+          icon: "error",
         });
-    }, [])
+      }
+    });
   };
+
   const columns = [
     {
       title: "#",
       dataIndex: "id",
       width: "30%",
       editable: false,
+      sorter: (a, b) => a.id - b.id,
+      defaultSortOrder: "ascend" 
     },
     {
       title: "Benefit",
       dataIndex: "Benefit",
       width: "38%",
       editable: true,
+      render: (text, render)=>(<p>{render.benefitPerks}</p>),
     },
     {
       title: "Action",
       dataIndex: "Action",
       render: (_, record) => {
+        // console.log(record);
         const editable = isEditing(record);
         return editable ? (
           <span>
@@ -277,33 +366,40 @@ const Benefit = () => {
             <Typography.Link
               disabled={editingKey !== ""}
               onClick={() => edit(record)}
-              style={{ marginRight: "5px" }}
+              style={{marginRight:"5px"}}
             >
               Edit
             </Typography.Link>
-            {record.active ? (
+            {!record.active ? (
+
+
+
               <Popconfirm
                 title="Are you sure to Re-Active this Job?"
-                onConfirm={() => HandleActiceJob(record)}
+                onConfirm={() => handleActiceJob(record)}
                 okText="Yes"
                 cancelText="No"
               >
                 <IconButton
-                  onClick={HandleActiceJob}
+                  onClick={handleActiceJob}
                   className={styled.DeleteBtn}
                 >
-                  <FontAwesomeIcon icon={faUndo} className={styled.cycle_btn} />
+                  <FontAwesomeIcon 
+                    icon={faUndo}
+                    className={styled.cycle_btn}
+                  />
                 </IconButton>
               </Popconfirm>
+
             ) : (
-              <Popconfirm
+              <Popconfirm 
                 title="Are you sure De-Active this job?"
-                onConfirm={() => HandleDeleteJob(record)}
+                onConfirm={() => handleDeleteJob(record)}
                 okText="Yes"
                 cancelText="No"
               >
                 <IconButton
-                  onClick={HandleDeleteJob}
+                  onClick={handleDeleteJob}
                   className={styled.DeleteBtn}
                 >
                   <FontAwesomeIcon
@@ -347,10 +443,11 @@ const Benefit = () => {
           className={styled.button}
           disabled={benefit === ""}
           type="text"
-          onClick={AddItem}
+          onClick={addItem}
         >
           Add
         </button>
+        
       </div>
       <Form form={form} component={false}>
         <Table
@@ -360,13 +457,6 @@ const Benefit = () => {
             },
           }}
           bordered
-          // dataSource={data}.map((entry,i)=>{ return (
-          //   {
-          //     id: i+1,
-          //     Benefit:entry,
-          //     active: entry
-          //   }
-          //    )})}
           dataSource={data}
           columns={mergedColumns}
           rowClassName="editable-row"

@@ -46,14 +46,14 @@ const EditableCell = ({
 const Education = () => {
   const [form] = Form.useForm();
   const [data, setData] = useState([]);
-  const [benefit, setBenefit] = useState("");
+  const [education, setEducation] = useState("");
   const [editingKey, setEditingKey] = useState("");
 
   useEffect(()=>{
 
     const fetchData = ()=>{
       fetch(
-        `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/benefits/all`
+        `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/education/all`
       )
       .then( async (response) =>{
         if(!(response.status>=200 && response.status<300) ){
@@ -62,8 +62,9 @@ const Education = () => {
         return await response.json()
       })
       .then((data) => {
+        data = data.map(d=>{return {...d, key: d.id}})
         setData(data);
-        console.log(data);
+        // console.log(data);
       })
       .catch((err) => {
         if(err.Error>400){
@@ -89,60 +90,112 @@ const Education = () => {
   const isEditing = (record) => record.key === editingKey;
   const edit = (record) => {
     form.setFieldsValue({
-      name: "",
-      age: "",
-      address: "",
+      education:record.education,
       ...record,
     });
+
+    
+
     setEditingKey(record.key);
+
+
+
   };
   const cancel = () => {
     setEditingKey("");
   };
+
   const save = async (key) => {
     try {
       const row = await form.validateFields();
       const newData = [...data];
       const index = newData.findIndex((item) => key === item.key);
+      
+
+
       if (index > -1) {
         const item = newData[index];
         newData.splice(index, 1, {
           ...item,
-          ...row,
+          education: row.education,
+          // ...row,
         });
-        setData(newData);
-        setEditingKey("");
-      } else {
-        newData.push(row);
-        setData(newData);
-        setEditingKey("");
-      }
+        
+        console.log(newData);
+
+        fetch(
+          `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/education/update/${key}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({education: row.education}),
+          },
+    
+          {
+            mode: "cors",
+          }
+          
+        )
+          .then((response) =>{
+            // console.log(response)
+            if(!(response.status>=200 && response.status<300) ){
+              throw new Error(response.status);
+            }  
+              
+            return response.json()
+          })
+          .then((response) => {
+            setData(newData)
+            setEditingKey("");
+            // setEducation("");
+          })
+          .catch((err) => {
+            if(err.Error>400){
+              swal(
+                {
+                  title: "Server Down",
+                  icon: "error",
+                });
+            }
+            else if(err.Error>299){
+              swal({
+                title: "Server Busy",
+                icon: "error",
+              });
+            }
+          });
+    
+      } 
+     
+
     } catch (errInfo) {
       console.log("Validate Failed:", errInfo);
     }
   };
   //////////////////////////////////////////////////////////////////////
   const handleChange = () => {
-    setData([...data, setBenefit]);
+    setData([...data, setEducation]);
   };
-  const addItem = () => {
-    const benefitObj = {
-      key: data.length + 1,
-      id: data.length + 1,
-      Benefit: benefit,
-      active: "",
+
+
+
+  const addItem = () => { 
+    const requestData = {
+      education: education,
     };
     
 
     fetch(
       // `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/job/all`,
-      `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/benefits/add`,
+      `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/education/add`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(benefitObj),
+        body: JSON.stringify(requestData),
       },
 
       {
@@ -151,16 +204,17 @@ const Education = () => {
       
     )
       .then((response) =>{
-        console.log(response)
+        // console.log(response)
         if(!(response.status>=200 && response.status<300) ){
           throw new Error(response.status);
         }  
           
         return response.json()
       })
-      .then((data) => {
-      
-        setData(data);
+      .then((response) => {
+        response ={ ...response, key: response.id };
+        setData([...data, response]);
+        setEducation("");
       })
       .catch((err) => {
         if(err.Error>400){
@@ -179,29 +233,60 @@ const Education = () => {
       });
 
 
-    setData([...data, benefitObj]);
-    setBenefit("");
   };
 
   //////////////////////////////////////////////////////////////////
   const handleActiceJob = (record) => {
-    setData(
-      data.map((j) => {
-        return j === record ? { ...j, active: false } : j;
-      })
-    );
+    // setData(
+    //   data.map((j) => {
+    //     return j === record ? { ...j, active: false } : j;
+    //   })
+    // );
+    fetch(
+      `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/education/reactive/${record.id}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        }
+      },
+      {
+        mode: "cors",
+      }
+    )
+    .then((response) => {
+      if(!(response.status>=200 && response.status<300) ){
+        throw new Error(response.status);
+      }
+      // setJobs(job.filter(j => j !== job));
+      // setData(data.map(j =>{ return (j === job) ?{...j, active:false} : j; }));
+      // setJobs(data.map(j =>{ return (j === job) ?{...j, active:false} : j; }));
+
+      // setFilteredData(filteredData.map(j =>{ return (j === job) ?{...j, active:false} : j; }));
+      setData(data.map(j =>{ return (j === record) ?{...j, active:true} : j; }));
+    })
+    .catch((err) => {
+      if(err.Error>400){
+        swal(
+          {
+            title: "Server Down",
+            icon: "error",
+          });
+      }
+      else if(err.Error>299){
+        swal({
+          title: "Server Busy",
+          icon: "error",
+        });
+      }
+    });
 
   };
 
   const handleDeleteJob = (record) => {
-    setData(
-      data.map((j) => {
-        return j === record ? { ...j, active: true } : j;
-      })
-    );
 
     fetch(
-      `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/denefits/delete/${1}`,
+      `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/education/delete/${record.id}`,
       {
         method: "DELETE",
         headers: {
@@ -219,9 +304,9 @@ const Education = () => {
       // setJobs(job.filter(j => j !== job));
       // setData(data.map(j =>{ return (j === job) ?{...j, active:false} : j; }));
       // setJobs(data.map(j =>{ return (j === job) ?{...j, active:false} : j; }));
-    }).then((data) => {
-      setData(data);
-      
+
+      // setFilteredData(filteredData.map(j =>{ return (j === job) ?{...j, active:false} : j; }));
+      setData(data.map(j =>{ return (j === record) ?{...j, active:false} : j; }));
     })
     .catch((err) => {
       if(err.Error>400){
@@ -239,23 +324,28 @@ const Education = () => {
       }
     });
   };
+
   const columns = [
     {
       title: "#",
       dataIndex: "id",
       width: "30%",
       editable: false,
+      sorter: (a, b) => a.id - b.id,
+      defaultSortOrder: "ascend" 
     },
     {
-      title: "Benefit",
-      dataIndex: "Benefit",
+      title: "education",
+      dataIndex: "education",
       width: "38%",
       editable: true,
+      render: (text, render)=>(<p>{render.education}</p>),
     },
     {
       title: "Action",
       dataIndex: "Action",
       render: (_, record) => {
+        // console.log(record);
         const editable = isEditing(record);
         return editable ? (
           <span>
@@ -280,7 +370,7 @@ const Education = () => {
             >
               Edit
             </Typography.Link>
-            {record.active ? (
+            {!record.active ? (
 
 
 
@@ -300,8 +390,6 @@ const Education = () => {
                   />
                 </IconButton>
               </Popconfirm>
-            
-
 
             ) : (
               <Popconfirm 
@@ -343,17 +431,17 @@ const Education = () => {
   });
   return (
     <>
-      <section className={styled.heading}> Education </section>
+      <section className={styled.heading}> education </section>
       <div className={styled.textbox}>
         <input
           className={styled.text}
           type={styled.textbar}
-          value={benefit}
-          onChange={(e) => setBenefit(e.target.value)}
+          value={education}
+          onChange={(e) => setEducation(e.target.value)}
         />
         <button
           className={styled.button}
-          disabled={benefit === ""}
+          disabled={education === ""}
           type="text"
           onClick={addItem}
         >
@@ -369,13 +457,6 @@ const Education = () => {
             },
           }}
           bordered
-          // dataSource={data}.map((entry,i)=>{ return (
-          //   {
-          //     id: i+1,
-          //     Benefit:entry,
-          //     active: entry
-          //   }
-          //    )})}
           dataSource={data}
           columns={mergedColumns}
           rowClassName="editable-row"

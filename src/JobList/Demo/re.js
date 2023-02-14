@@ -1,6 +1,5 @@
 import { Form, InputNumber, Popconfirm, Table, Typography, Input } from "antd";
 import { useEffect, useState } from "react";
-
 // import swal from 'sweetalert';
 import {
   faTrash,
@@ -44,17 +43,17 @@ const EditableCell = ({
     </td>
   );
 };
-const SoftSkill = () => {
+const Education = () => {
   const [form] = Form.useForm();
   const [data, setData] = useState([]);
-  const [softSkill, setsoftSkill] = useState("");
+  const [benefit, setBenefit] = useState("");
   const [editingKey, setEditingKey] = useState("");
 
   useEffect(()=>{
 
     const fetchData = ()=>{
       fetch(
-        `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/softSkill/all`
+        `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/benefits/all`
       )
       .then( async (response) =>{
         if(!(response.status>=200 && response.status<300) ){
@@ -91,7 +90,7 @@ const SoftSkill = () => {
   const isEditing = (record) => record.key === editingKey;
   const edit = (record) => {
     form.setFieldsValue({
-      softSkill:record.softSkill,
+      Benefit:record.benefitPerks,
       ...record,
     });
 
@@ -118,20 +117,20 @@ const SoftSkill = () => {
         const item = newData[index];
         newData.splice(index, 1, {
           ...item,
-          softSkill: row.softSkill,
+          benefitPerks: row.Benefit,
           // ...row,
         });
         
         console.log(newData);
 
         fetch(
-          `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/softSkill/update/${key}`,
+          `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/benefits/update/${key}`,
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({softSkill: row.softSkill}),
+            body: JSON.stringify({benefitPerks: row.Benefit}),
           },
     
           {
@@ -150,7 +149,7 @@ const SoftSkill = () => {
           .then((response) => {
             setData(newData)
             setEditingKey("");
-            // setsoftSkill("");
+            // setBenefit("");
           })
           .catch((err) => {
             if(err.Error>400){
@@ -177,20 +176,20 @@ const SoftSkill = () => {
   };
   //////////////////////////////////////////////////////////////////////
   const handleChange = () => {
-    setData([...data, setsoftSkill]);
+    setData([...data, setBenefit]);
   };
 
 
 
   const addItem = () => { 
     const requestData = {
-      softSkill: softSkill,
+      benefitPerks: benefit,
     };
     
 
     fetch(
       // `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/job/all`,
-      `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/softSkill/add`,
+      `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/benefits/add`,
       {
         method: "POST",
         headers: {
@@ -215,7 +214,7 @@ const SoftSkill = () => {
       .then((response) => {
         response ={ ...response, key: response.id };
         setData([...data, response]);
-        setsoftSkill("");
+        setBenefit("");
       })
       .catch((err) => {
         if(err.Error>400){
@@ -244,7 +243,7 @@ const SoftSkill = () => {
     //   })
     // );
     fetch(
-      `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/softSkill/reactive/${record.id}`,
+      `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/benefits/reactive/${record.id}`,
       {
         method: "POST",
         headers: {
@@ -287,7 +286,7 @@ const SoftSkill = () => {
   const handleDeleteJob = (record) => {
 
     fetch(
-      `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/softSkill/delete/${record.id}`,
+      `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/benefits/delete/${record.id}`,
       {
         method: "DELETE",
         headers: {
@@ -336,11 +335,11 @@ const SoftSkill = () => {
       defaultSortOrder: "ascend" 
     },
     {
-      title: "softSkill",
-      dataIndex: "softSkill",
+      title: "Benefit",
+      dataIndex: "Benefit",
       width: "38%",
       editable: true,
-      render: (text, render)=>(<p>{render.softSkill}</p>),
+      render: (text, render)=>(<p>{render.benefitPerks}</p>),
     },
     {
       title: "Action",
@@ -432,17 +431,17 @@ const SoftSkill = () => {
   });
   return (
     <>
-      <section className={styled.heading}> SoftSkill </section>
+      <section className={styled.heading}> Benefit </section>
       <div className={styled.textbox}>
         <input
           className={styled.text}
           type={styled.textbar}
-          value={softSkill}
-          onChange={(e) => setsoftSkill(e.target.value)}
+          value={benefit}
+          onChange={(e) => setBenefit(e.target.value)}
         />
         <button
           className={styled.button}
-          disabled={softSkill === ""}
+          disabled={benefit === ""}
           type="text"
           onClick={addItem}
         >
@@ -469,4 +468,4 @@ const SoftSkill = () => {
     </>
   );
 };
-export default SoftSkill;
+export default Education;
