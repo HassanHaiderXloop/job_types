@@ -48,7 +48,7 @@ const EditableCell = ({
     </td>
   );
 };
-const Perks = () => {
+const Education = () => {
   const [form] = Form.useForm();
   const [data, setData] = useState([]);
   const [benefit, setBenefit] = useState("");
@@ -261,7 +261,7 @@ const Perks = () => {
   });
   return (
     <>
-      <section className={styled.heading}> Perks </section>
+      <section className={styled.heading}> Education </section>
       <div className={styled.textbox}>
         <input
           className={styled.text}
@@ -305,4 +305,4 @@ const Perks = () => {
     </>
   );
 };
-export default Perks;
+export default Education;

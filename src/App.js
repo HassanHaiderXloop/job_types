@@ -22,8 +22,8 @@ function App() {
       {/* <Perks/> */}
       {/* <City/> */}
       {/* <Department/> */}
-      {/* <Education/> */}
-      <SoftSkill/>
+      <Education/>
+      {/* <SoftSkill/> */}
       {/* <TechnicalSkills/> */}
       {/* <Example/> */}
       </header>

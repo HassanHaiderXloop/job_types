@@ -1,14 +1,9 @@
 import { Form, InputNumber, Popconfirm, Table, Typography, Input } from "antd";
-import { useState } from "react";
+import { useState , useEffect } from "react";
+import swal from 'sweetalert';
 import {
   faTrash,
-  faRecycle,
-  faUndo,
-  faBicycle,
-  UndoOutlined,
-  faEdit,
-  faClone,
-  faCirclePlus,
+  faUndo
 } from "@fortawesome/free-solid-svg-icons";
 // import swal from "sweetalert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -54,7 +49,6 @@ const Benefit = () => {
   const [benefit, setBenefit] = useState("");
   const [editingKey, setEditingKey] = useState("");
 
-
   const isEditing = (record) => record.key === editingKey;
   const edit = (record) => {
     form.setFieldsValue({
@@ -94,7 +88,7 @@ const Benefit = () => {
   const handleChange = () => {
     setData([...data, setBenefit]);
   };
-  const addItem = () => {
+  const AddItem = () => {
     const benefitObj = {
       key: data.length + 1,
       id: data.length + 1,
@@ -103,59 +97,148 @@ const Benefit = () => {
     };
     setData([...data, benefitObj]);
     setBenefit("");
+
+    useEffect(() => {  
+      fetch(
+        `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/job/all`,
+        // `http://localhost:5000/job/post`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          }
+        },
+        {
+          mode: "cors",
+        }
+      )
+        .then((response) =>{
+          if(!(response.status>=200 && response.status<300) ){
+            throw new Error(response.status);
+          }  
+          return response.json()
+        })
+        .then((data) => {
+          setData(data);
+          // setFilteredData(data);
+          // setLoading(false);
+        })
+        .catch((err) => {
+          if(err.Error>400){
+            swal(
+              {
+                title: "Server Down",
+                icon: "error",
+              });
+          }
+          else if(err.Error>299){
+            swal({
+              title: "Server Busy",
+              icon: "error",
+            });
+          }
+        });
+    }, [])
   };
 
   //////////////////////////////////////////////////////////////////
-  const handleActiceJob = (record) => {
+  const HandleActiceJob = (record) => {
     setData(
       data.map((j) => {
         return j === record ? { ...j, active: false } : j;
       })
     );
+    useEffect(() => {  
+      fetch(
+        `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/job/all`,
+        // `http://localhost:5000/job/post`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          }
+        },
+        {
+          mode: "cors",
+        }
+      )
+        .then((response) =>{
+          if(!(response.status>=200 && response.status<300) ){
+            throw new Error(response.status);
+          }  
+          return response.json()
+        })
+        .then((data) => {
+          setData(data);
+          // setFilteredData(data);
+          // setLoading(false);
+        })
+        .catch((err) => {
+          if(err.Error>400){
+            swal(
+              {
+                title: "Server Down",
+                icon: "error",
+              });
+          }
+          else if(err.Error>299){
+            swal({
+              title: "Server Busy",
+              icon: "error",
+            });
+          }
+        });
+    }, [])
   };
 
-  const handleDeleteJob = (record) => {
+  const HandleDeleteJob = (record) => {
     setData(
       data.map((j) => {
         return j === record ? { ...j, active: true } : j;
       })
     );
 
-    // fetch(
-    //   `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/job/delete/${job.id}`,
-    //   {
-    //     method: "DELETE",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     }
-    //   },
-    //   {
-    //     mode: "cors",
-    //   }
-    // )
-    // .then((response) => {
-    //   if(!(response.status>=200 && response.status<300) ){
-    //     throw new Error(response.status);
-    //   }
-    //   // setJobs(job.filter(j => j !== job));
-    //   setData(data.map(j =>{ return (j === job) ?{...j, active:false} : j; }));
-    //   setJobs(data.map(j =>{ return (j === job) ?{...j, active:false} : j; }));
-    // })
-    // .catch((err) => {
-    //   if(err.Error>400){
-    //     swal(
-    //       {
-    //         title: "Server Down",
-    //         icon: "error",
-    //       });
-    //   }
-    //   else if(err.Error>299){
-    //     swal({
-    //       title: "Server Busy",
-    //       icon: "error",
-    //     });
-    //   }
-    // });
+    useEffect(() => {  
+      fetch(
+        `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/job/all`,
+        // `http://localhost:5000/job/post`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          }
+        },
+        {
+          mode: "cors",
+        }
+      )
+        .then((response) =>{
+          if(!(response.status>=200 && response.status<300) ){
+            throw new Error(response.status);
+          }  
+          return response.json()
+        })
+        .then((data) => {
+          setData(data);
+          // setFilteredData(data);
+          // setLoading(false);
+        })
+        .catch((err) => {
+          if(err.Error>400){
+            swal(
+              {
+                title: "Server Down",
+                icon: "error",
+              });
+          }
+          else if(err.Error>299){
+            swal({
+              title: "Server Busy",
+              icon: "error",
+            });
+          }
+        });
+    }, [])
   };
   const columns = [
     {
@@ -194,42 +277,33 @@ const Benefit = () => {
             <Typography.Link
               disabled={editingKey !== ""}
               onClick={() => edit(record)}
-              style={{marginRight:"5px"}}
+              style={{ marginRight: "5px" }}
             >
               Edit
             </Typography.Link>
             {record.active ? (
-
-
-
               <Popconfirm
                 title="Are you sure to Re-Active this Job?"
-                onConfirm={() => handleActiceJob(record)}
+                onConfirm={() => HandleActiceJob(record)}
                 okText="Yes"
                 cancelText="No"
               >
                 <IconButton
-                  onClick={handleActiceJob}
+                  onClick={HandleActiceJob}
                   className={styled.DeleteBtn}
                 >
-                  <FontAwesomeIcon 
-                    icon={faUndo}
-                    className={styled.cycle_btn}
-                  />
+                  <FontAwesomeIcon icon={faUndo} className={styled.cycle_btn} />
                 </IconButton>
               </Popconfirm>
-            
-
-
             ) : (
-              <Popconfirm 
+              <Popconfirm
                 title="Are you sure De-Active this job?"
-                onConfirm={() => handleDeleteJob(record)}
+                onConfirm={() => HandleDeleteJob(record)}
                 okText="Yes"
                 cancelText="No"
               >
                 <IconButton
-                  onClick={handleDeleteJob}
+                  onClick={HandleDeleteJob}
                   className={styled.DeleteBtn}
                 >
                   <FontAwesomeIcon
@@ -273,11 +347,10 @@ const Benefit = () => {
           className={styled.button}
           disabled={benefit === ""}
           type="text"
-          onClick={addItem}
+          onClick={AddItem}
         >
           Add
         </button>
-        
       </div>
       <Form form={form} component={false}>
         <Table

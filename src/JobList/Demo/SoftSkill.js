@@ -1,14 +1,9 @@
 import { Form, InputNumber, Popconfirm, Table, Typography, Input } from "antd";
-import { useState } from "react";
+import { useState , useEffect } from "react";
+import swal from 'sweetalert';
 import {
   faTrash,
-  faRecycle,
-  faUndo,
-  faBicycle,
-  UndoOutlined,
-  faEdit,
-  faClone,
-  faCirclePlus,
+  faUndo
 } from "@fortawesome/free-solid-svg-icons";
 // import swal from "sweetalert";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -94,7 +89,7 @@ const SoftSkill = () => {
   const handleChange = () => {
     setData([...data, setBenefit]);
   };
-  const addItem = () => {
+  const AddItem = () => {
     const benefitObj = {
       key: data.length + 1,
       id: data.length + 1,
@@ -103,10 +98,53 @@ const SoftSkill = () => {
     };
     setData([...data, benefitObj]);
     setBenefit("");
+
+    useEffect(() => {  
+      fetch(
+        `http://jobserviceelasticservice-env.eba-nivmzfat.ap-south-1.elasticbeanstalk.com/job/all`,
+        // `http://localhost:5000/job/post`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          }
+        },
+        {
+          mode: "cors",
+        }
+      )
+        .then((response) =>{
+          if(!(response.status>=200 && response.status<300) ){
+            throw new Error(response.status);
+          }  
+          return response.json()
+        })
+        .then((data) => {
+          setData(data);
+          // setFilteredData(data);
+          // setLoading(false);
+        })
+        .catch((err) => {
+          if(err.Error>400){
+            swal(
+              {
+                title: "Server Down",
+                icon: "error",
+              });
+          }
+          else if(err.Error>299){
+            swal({
+              title: "Server Busy",
+              icon: "error",
+            });
+          }
+        });
+    }, [])
+
   };
 
   //////////////////////////////////////////////////////////////////
-  const handleActiceJob = (record) => {
+  const HandleActiceJob = (record) => {
     setData(
       data.map((j) => {
         return j === record ? { ...j, active: false } : j;
@@ -204,12 +242,12 @@ const SoftSkill = () => {
 
               <Popconfirm
                 title="Are you sure to Re-Active this Job?"
-                onConfirm={() => handleActiceJob(record)}
+                onConfirm={() => HandleActiceJob(record)}
                 okText="Yes"
                 cancelText="No"
               >
                 <IconButton
-                  onClick={handleActiceJob}
+                  onClick={HandleActiceJob}
                   className={styled.DeleteBtn}
                 >
                   <FontAwesomeIcon 
@@ -273,7 +311,7 @@ const SoftSkill = () => {
           className={styled.button}
           disabled={benefit === ""}
           type="text"
-          onClick={addItem}
+          onClick={AddItem}
         >
           Add
         </button>
